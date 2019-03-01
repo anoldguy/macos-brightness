@@ -12,7 +12,6 @@ void CoreDisplay_Display_SetUserBrightness(CGDirectDisplayID id, double b);
 import "C"
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -59,16 +58,6 @@ func displays() ([]Display, error) {
 	return disp, nil
 }
 
-func findBuiltin(d []Display) (Display, error) {
-	for _, dd := range d {
-		if dd.Builtin() {
-			return dd, nil
-		}
-	}
-
-	return Display{}, errors.New("builtin display not found")
-}
-
 func main() {
 	brightness := flag.Float64("b", -1, "Set the brightness (between 0 - 100)")
 	flag.Parse()
@@ -78,15 +67,14 @@ func main() {
 		panic(err)
 	}
 
-	bd, err := findBuiltin(d)
-	if err != nil {
-		panic(err)
-	}
-
 	if *brightness == -1 {
-		fmt.Println(bd.Brightness())
+		for _, dd := range d {
+			fmt.Println(dd.Brightness())
+		}
 		os.Exit(0)
 	}
 
-	bd.SetBrightness(*brightness)
+	for _, dd := range d {
+		dd.SetBrightness(*brightness)
+	}
 }
